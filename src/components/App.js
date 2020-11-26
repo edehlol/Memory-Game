@@ -1,107 +1,121 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import Gameboard from './Gameboard';
+import GameCompleted from './GameCompleted';
 import { createDeck } from '../cards';
+import { cardsReducer } from '../reducers';
+import { formatTime } from '../helpers';
 
 import '../style.css';
+import { fetchPokemon } from '../apis/pokedex';
 
 //TODO
-// 1. Fix cardsreducer
-// 2. Implement flippedcard timer
-// 3. make reset deck action
 
 const initialCards = createDeck();
 
-const cardsReducer = (cards, action) => {
-  switch (action.type) {
-    case 'FLIP_CARD':
-      if (
-        cards.find((card) => card.id === action.payload).flipped &&
-        !cards.find((card) => card.id === action.payload).guessed
-      ) {
-        return cards;
-      } else {
-        return cards.map((card) => {
-          if (card.id === action.payload) {
-            return card.guessed ? card : { ...card, flipped: !card.flipped };
-          } else {
-            return card;
-          }
-        });
-      }
-    case 'COMPARE_CARDS':
-      const flippedCards = cards.filter((card) => card.flipped).filter((card) => !card.guessed);
-      if (flippedCards.length === 2) {
-        if (flippedCards[0].img === flippedCards[1].img) {
-          return cards.map((card) => {
-            if (card.flipped) {
-              return { ...card, guessed: true };
-            } else {
-              return card;
-            }
-          });
-        } else {
-          return cards.map((card) => {
-            if (card.flipped && !card.guessed) {
-              return { ...card, flipped: false };
-            } else {
-              return card;
-            }
-          });
-        }
-      } else {
-        return cards;
-      }
-    case 'RESET_CARDS':
-      return createDeck();
-    default:
-      return cards;
-  }
-};
-
 const App = () => {
   const [cards, cardsDispatch] = useReducer(cardsReducer, initialCards);
-  useEffect(() => {}, [cards]);
-
-  const [score, setScore] = useState(0);
+  const [matched, setMatched] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const maxScore = cards.length / 2;
+  const maxAttempts = 20;
+  const [timer, setTimer] = useState(0);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [completedMsg, setCompletedMsg] = useState('');
+
+  useEffect(() => {
+    const requestCards = async () => {
+      const cards = await fetchPokemon();
+      cardsDispatch({
+        type: 'RESET',
+        payload: cards,
+      });
+    };
+    requestCards();
+  }, []);
 
   const addToScore = () => {
-    setScore(score + 1);
+    setMatched(matched + 1);
+  };
+  const addToAttempts = () => {
+    setAttempts(attempts + 1 / 2);
   };
 
   const calculateProgress = () => {
-    return `${(score / maxScore) * 100}%`;
+    return `${(matched / maxScore) * 100}%`;
   };
   const onNewGame = () => {
-    setScore(0);
-    cardsDispatch({ type: 'RESET_CARDS' });
+    if (gameCompleted) {
+      setMatched(0);
+      setAttempts(0);
+      setTimer(0);
+      setGameCompleted(false);
+      setCompletedMsg('');
+      cardsDispatch({ type: 'RESET_CARDS', payload: createDeck() });
+    }
   };
+
+  const getHighScore = () => {
+    return matched * ((attempts / maxAttempts) * 125);
+  };
+
+  useEffect(() => {
+    if (!gameCompleted) {
+      const interval = setInterval(() => {
+        setTimer(timer + 1);
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [gameCompleted, setTimer, timer]);
+
+  useEffect(() => {
+    if (attempts === maxAttempts || cards.every((card) => card.guessed === true)) {
+      setGameCompleted(true);
+    }
+  }, [cards, attempts]);
+
+  useEffect(() => {
+    if (gameCompleted) {
+      if (cards.every((card) => card.guessed)) {
+        setCompletedMsg('You Won!');
+      } else {
+        setCompletedMsg('You Lost!');
+      }
+    }
+  }, [cards, gameCompleted]);
 
   return (
     <div className="fluid-container mt-2">
-      {attempts} / 15
+      score: {getHighScore()}
+      <div>{completedMsg}</div>
+      <div>timer: {formatTime(timer)}</div>
+      {Math.floor(attempts)} / {maxAttempts} Attempts
       <div className="progress mb-4" style={{ height: '40px' }}>
         <div
           className="progress-bar"
           style={{ width: calculateProgress() }}
-          aria-valuenow={score}
+          aria-valuenow={matched}
           aria-valuemin="0"
           aria-valuemax="100"
         >
-          Score: {score}
+          Score: {matched}
           {` / ${maxScore}`}
         </div>
       </div>
-      <button className=" btn btn-primary" onClick={onNewGame}>
+      <button
+        className={` btn ${gameCompleted ? `btn-primary` : 'btn-secondary'}`}
+        onClick={onNewGame}
+      >
         New Game
       </button>
+      <GameCompleted />
       <Gameboard
         cardsDispatch={cardsDispatch}
         addToScore={addToScore}
         cards={cards}
-        setAttempts={setAttempts}
-        attempts={attempts}
+        addToAttempts={addToAttempts}
+        gameCompleted={gameCompleted}
       />
     </div>
   );

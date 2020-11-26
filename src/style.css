@@ -23,7 +23,8 @@
 .card-front {
   grid-area: frontAndBack;
 }
-
-/* .card-container:hover .card-flip {
-  transform: rotateY(180deg);
-} */
+.card-img {
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}

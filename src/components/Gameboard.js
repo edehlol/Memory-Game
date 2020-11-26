@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Card from './Card';
 
-const Gameboard = ({ addToScore, cards, onSetCards, setAttempts, attempts, cardsDispatch }) => {
+const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameCompleted }) => {
   const [flippedCardTimeout, setFlippedCardTimeout] = useState(false);
 
   const onFlipCard = (id) => {
-    if (!flippedCardTimeout) {
-      cardsDispatch({ type: 'FLIP_CARD', payload: id });
+    if (gameCompleted) {
+      return;
     }
     const flippedCards = cards.filter((card) => card.flipped).filter((card) => !card.guessed);
+    if (!flippedCardTimeout) {
+      if (cards.find((card) => card.id === id).flipped) {
+        return;
+      } else {
+        addToAttempts();
+        cardsDispatch({ type: 'FLIP_CARD', payload: id });
+      }
+    }
     if (flippedCards.length === 1) {
-      if (cards.find((card) => card.id === id).img === flippedCards[0].img) {
+      if (
+        cards.find((card) => card.id === id).img === flippedCards[0].img &&
+        cards.find((card) => card.id === id).id !== flippedCards[0].id
+      ) {
         cardsDispatch({ type: 'COMPARE_CARDS' });
         addToScore();
       } else {
@@ -33,7 +44,7 @@ const Gameboard = ({ addToScore, cards, onSetCards, setAttempts, attempts, cards
   };
 
   return (
-    <div className="d-flex flex-wrap" style={{ maxWidth: '600px' }}>
+    <div className="d-flex flex-wrap mx-auto" style={{ maxWidth: '600px' }}>
       {renderCards()}
     </div>
   );

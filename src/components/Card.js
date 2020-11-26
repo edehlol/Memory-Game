@@ -17,11 +17,11 @@ const Card = ({ card, flipCard }) => {
       style={{ width: '20%', height: '20%', transform: `rotateY(${rotate}deg)` }}
       onClick={onCardClick}
     >
-      <div className="card-flip card " style={{ transform: rotate }}>
+      <div className="card-flip card card-img" style={{ transform: rotate }}>
         <div className="card-back bg-dark rounded">
           <img src={card.img} className="img-fluid" alt="cardback" />
         </div>
-        <div className="card-front bg-dark rounded">
+        <div className="card-front bg-dark rounded card-img">
           <img src={cardFront} className="img-fluid" alt="card front" />
         </div>
       </div>
