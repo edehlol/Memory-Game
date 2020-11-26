@@ -4,22 +4,64 @@ import { createDeck } from '../cards';
 
 import '../style.css';
 
+//TODO
+// 1. Fix cardsreducer
+// 2. Implement flippedcard timer
+// 3. make reset deck action
+
+const initialCards = createDeck();
+
+const cardsReducer = (cards, action) => {
+  switch (action.type) {
+    case 'FLIP_CARD':
+      if (
+        cards.find((card) => card.id === action.payload).flipped &&
+        !cards.find((card) => card.id === action.payload).guessed
+      ) {
+        return cards;
+      } else {
+        return cards.map((card) => {
+          if (card.id === action.payload) {
+            return card.guessed ? card : { ...card, flipped: !card.flipped };
+          } else {
+            return card;
+          }
+        });
+      }
+    case 'COMPARE_CARDS':
+      const flippedCards = cards.filter((card) => card.flipped).filter((card) => !card.guessed);
+      if (flippedCards.length === 2) {
+        if (flippedCards[0].img === flippedCards[1].img) {
+          return cards.map((card) => {
+            if (card.flipped) {
+              return { ...card, guessed: true };
+            } else {
+              return card;
+            }
+          });
+        } else {
+          return cards.map((card) => {
+            if (card.flipped && !card.guessed) {
+              return { ...card, flipped: false };
+            } else {
+              return card;
+            }
+          });
+        }
+      } else {
+        return cards;
+      }
+    case 'RESET_CARDS':
+      return createDeck();
+    default:
+      return cards;
+  }
+};
+
 const App = () => {
-  const initialCards = { cards: createDeck() };
+  const [cards, cardsDispatch] = useReducer(cardsReducer, initialCards);
+  useEffect(() => {}, [cards]);
 
-  const cardsReducer = (state, action) => {
-    switch (action.type) {
-      case 'FLIP_CARD':
-        console.log(state);
-        return state;
-      default:
-        return state;
-    }
-  };
-
-  // const [cards, cardsDispatch] = useReducer(cardsReducer, initialCards);
-
-  const [cards, setCards] = useState([]);
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const maxScore = cards.length / 2;
@@ -31,18 +73,10 @@ const App = () => {
   const calculateProgress = () => {
     return `${(score / maxScore) * 100}%`;
   };
-
-  const onSetCards = (cards) => {
-    setCards(cards);
-  };
   const onNewGame = () => {
     setScore(0);
-    setCards(createDeck());
+    cardsDispatch({ type: 'RESET_CARDS' });
   };
-
-  useEffect(() => {
-    setCards(createDeck());
-  }, [setCards]);
 
   return (
     <div className="fluid-container mt-2">
@@ -63,9 +97,9 @@ const App = () => {
         New Game
       </button>
       <Gameboard
+        cardsDispatch={cardsDispatch}
         addToScore={addToScore}
         cards={cards}
-        onSetCards={onSetCards}
         setAttempts={setAttempts}
         attempts={attempts}
       />
