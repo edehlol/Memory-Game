@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import cardFront from '../SVG/logo512.png';
+import cardFront from '../SVG/question.svg';
 
 const Card = ({ card, flipCard }) => {
   const [rotate, setRotate] = useState('0');
@@ -13,16 +13,21 @@ const Card = ({ card, flipCard }) => {
   };
   return (
     <div
-      className="card-container m-2"
-      style={{ width: '20%', height: '20%', transform: `rotateY(${rotate}deg)` }}
+      className="card-container m-1 "
+      style={{
+        width: '20%',
+        height: 'auto',
+        minWidth: '30px',
+        transform: `rotateY(${rotate}deg) rotate(360deg)`,
+      }}
       onClick={onCardClick}
     >
-      <div className="card-flip card card-img" style={{ transform: rotate }}>
-        <div className="card-back bg-dark rounded">
-          <img src={card.img} className="img-fluid" alt="cardback" />
+      <div className="card-flip card card-img bg-dark" style={{ transform: rotate }}>
+        <div className="card-back rounded mx-auto my-auto">
+          <img src={card.img} className="img-fluid mx-auto" alt="cardback" />
         </div>
-        <div className="card-front bg-dark rounded card-img">
-          <img src={cardFront} className="img-fluid" alt="card front" />
+        <div className="card-front bg-dark rounded card-img mx-auto my-auto">
+          <img src={cardFront} className="img-fluid px-4 py-4" alt="card front" />
         </div>
       </div>
     </div>

@@ -1,37 +1,32 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import Gameboard from './Gameboard';
-import GameCompleted from './GameCompleted';
-import { createDeck } from '../cards';
+import { createCards } from '../cards';
 import { cardsReducer } from '../reducers';
 import { formatTime } from '../helpers';
 
 import '../style.css';
-import { fetchPokemon } from '../apis/pokedex';
+import GameCompleted from './GameCompleted';
+import Attempts from './Attempts';
 
 //TODO
 
-const initialCards = createDeck();
-
 const App = () => {
-  const [cards, cardsDispatch] = useReducer(cardsReducer, initialCards);
+  const [cards, cardsDispatch] = useReducer(cardsReducer, null);
   const [matched, setMatched] = useState(0);
   const [attempts, setAttempts] = useState(0);
-  const maxScore = cards.length / 2;
-  const maxAttempts = 20;
   const [timer, setTimer] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [completedMsg, setCompletedMsg] = useState('');
+  const maxScore = 8;
+  const maxAttempts = 20;
 
-  useEffect(() => {
-    const requestCards = async () => {
-      const cards = await fetchPokemon();
-      cardsDispatch({
-        type: 'RESET',
-        payload: cards,
-      });
-    };
-    requestCards();
-  }, []);
+  const requestCards = async () => {
+    const cards = await createCards();
+    cardsDispatch({
+      type: 'RESET_CARDS',
+      payload: cards,
+    });
+  };
 
   const addToScore = () => {
     setMatched(matched + 1);
@@ -45,18 +40,28 @@ const App = () => {
   };
   const onNewGame = () => {
     if (gameCompleted) {
-      setMatched(0);
-      setAttempts(0);
-      setTimer(0);
       setGameCompleted(false);
+      requestCards();
+      setMatched(0);
+      setTimer(0);
       setCompletedMsg('');
-      cardsDispatch({ type: 'RESET_CARDS', payload: createDeck() });
+      setAttempts(0);
     }
   };
 
   const getHighScore = () => {
-    return matched * ((attempts / maxAttempts) * 125);
+    return Math.round(matched * ((attempts / maxAttempts) * 125));
   };
+  const getAttempts = () => {
+    return `${Math.floor(attempts)} / ${maxAttempts}`;
+  };
+  const getTime = () => {
+    return formatTime(timer);
+  };
+
+  useEffect(() => {
+    requestCards();
+  }, []);
 
   useEffect(() => {
     if (!gameCompleted) {
@@ -70,10 +75,12 @@ const App = () => {
   }, [gameCompleted, setTimer, timer]);
 
   useEffect(() => {
-    if (attempts === maxAttempts || cards.every((card) => card.guessed === true)) {
-      setGameCompleted(true);
+    if (cards) {
+      if (attempts === maxAttempts || (cards.every((card) => card.guessed) && timer > 0)) {
+        setGameCompleted(true);
+      }
     }
-  }, [cards, attempts]);
+  }, [timer, cards, attempts, gameCompleted]);
 
   useEffect(() => {
     if (gameCompleted) {
@@ -87,11 +94,9 @@ const App = () => {
 
   return (
     <div className="fluid-container mt-2">
-      score: {getHighScore()}
+      <Attempts />
       <div>{completedMsg}</div>
-      <div>timer: {formatTime(timer)}</div>
-      {Math.floor(attempts)} / {maxAttempts} Attempts
-      <div className="progress mb-4" style={{ height: '40px' }}>
+      <div className="progress mb-4" style={{ height: '20px' }}>
         <div
           className="progress-bar"
           style={{ width: calculateProgress() }}
@@ -103,13 +108,15 @@ const App = () => {
           {` / ${maxScore}`}
         </div>
       </div>
-      <button
-        className={` btn ${gameCompleted ? `btn-primary` : 'btn-secondary'}`}
-        onClick={onNewGame}
-      >
-        New Game
-      </button>
-      <GameCompleted />
+      {gameCompleted && (
+        <GameCompleted
+          gameCompleted={gameCompleted}
+          onNewGame={onNewGame}
+          getHighScore={getHighScore}
+          getAttempts={getAttempts}
+          getTime={getTime}
+        />
+      )}
       <Gameboard
         cardsDispatch={cardsDispatch}
         addToScore={addToScore}
@@ -117,6 +124,8 @@ const App = () => {
         addToAttempts={addToAttempts}
         gameCompleted={gameCompleted}
       />
+      <div>timer: {getTime()}</div>
+      {getAttempts()} Attempts
     </div>
   );
 };

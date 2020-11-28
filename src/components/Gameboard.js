@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import Card from './Card';
 
+import correctSound from '../sounds/Conversion1.wav';
+import incorrectSound from '../sounds/IMHIT_Damage.wav';
+
+const CORRECT_COMBO = new Audio(correctSound);
+const INCORRECT_COMBO = new Audio(incorrectSound);
+
 const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameCompleted }) => {
   const [flippedCardTimeout, setFlippedCardTimeout] = useState(false);
-
-  const onFlipCard = (id) => {
-    if (gameCompleted) {
-      return;
-    }
-    const flippedCards = cards.filter((card) => card.flipped).filter((card) => !card.guessed);
-    if (!flippedCardTimeout) {
-      if (cards.find((card) => card.id === id).flipped) {
-        return;
-      } else {
-        addToAttempts();
-        cardsDispatch({ type: 'FLIP_CARD', payload: id });
+  const flipCard = (id) => {
+    if (!gameCompleted) {
+      if (!flippedCardTimeout) {
+        if (!cards.find((card) => card.id === id).flipped) {
+          addToAttempts();
+          cardsDispatch({ type: 'FLIP_CARD', payload: id });
+        }
       }
     }
+  };
+  const compareCards = (id) => {
+    const flippedCards = cards.filter((card) => card.flipped).filter((card) => !card.guessed);
     if (flippedCards.length === 1) {
       if (
         cards.find((card) => card.id === id).img === flippedCards[0].img &&
         cards.find((card) => card.id === id).id !== flippedCards[0].id
       ) {
         cardsDispatch({ type: 'COMPARE_CARDS' });
+        CORRECT_COMBO.play();
         addToScore();
       } else {
         setFlippedCardTimeout(true);
+        INCORRECT_COMBO.play();
         const timeout = setTimeout(() => {
           setFlippedCardTimeout(false);
           cardsDispatch({ type: 'COMPARE_CARDS' });
@@ -33,6 +39,10 @@ const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameComple
         return () => clearTimeout(timeout);
       }
     }
+  };
+  const onFlipCard = (id) => {
+    flipCard(id);
+    compareCards(id);
   };
 
   const renderCards = () => {
@@ -45,7 +55,13 @@ const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameComple
 
   return (
     <div className="d-flex flex-wrap mx-auto" style={{ maxWidth: '600px' }}>
-      {renderCards()}
+      {cards ? (
+        renderCards()
+      ) : (
+        <div className="spinner-border mx-auto" role="status">
+          <span className="sr-only">Loading...</span>
+        </div>
+      )}
     </div>
   );
 };

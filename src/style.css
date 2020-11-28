@@ -8,7 +8,7 @@
   grid-template: 1fr / 1fr;
   grid-template-areas: 'frontAndBack';
   transform-style: preserve-3d;
-  transition: all 0.5s ease;
+  transition: all 0.5s ease-out;
 }
 
 .card-flip div {
@@ -27,4 +27,21 @@
   pointer-events: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+}
+
+/* 
+ */
+.completed-container {
+  position: fixed;
+  visibility: hidden;
+
+  z-index: 1000;
+  position: absolute;
+  background: white;
+  height: 100vh;
+  width: 100vw;
+  top: 0;
+}
+.completed-container > * {
+  opacity: 1;
 }
