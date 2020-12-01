@@ -5,15 +5,17 @@ import { cardsReducer } from '../reducers';
 import { formatTime } from '../helpers';
 
 import '../style.css';
+import GameInfo from './GameInfo';
 import GameCompleted from './GameCompleted';
-import Attempts from './Attempts';
+
+import logo from '../SVG/pokemon-logo.svg';
 
 //TODO
 
 const App = () => {
   const [cards, cardsDispatch] = useReducer(cardsReducer, null);
   const [matched, setMatched] = useState(0);
-  const [attempts, setAttempts] = useState(0);
+  const [attempts, setAttempts] = useState(20);
   const [timer, setTimer] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [completedMsg, setCompletedMsg] = useState('');
@@ -32,12 +34,14 @@ const App = () => {
     setMatched(matched + 1);
   };
   const addToAttempts = () => {
-    setAttempts(attempts + 1 / 2);
+    console.log(attempts);
+    setAttempts(attempts - 0.5);
   };
 
   const calculateProgress = () => {
     return `${(matched / maxScore) * 100}%`;
   };
+
   const onNewGame = () => {
     if (gameCompleted) {
       setGameCompleted(false);
@@ -45,7 +49,7 @@ const App = () => {
       setMatched(0);
       setTimer(0);
       setCompletedMsg('');
-      setAttempts(0);
+      setAttempts(maxAttempts);
     }
   };
 
@@ -53,7 +57,7 @@ const App = () => {
     return Math.round(matched * ((attempts / maxAttempts) * 125));
   };
   const getAttempts = () => {
-    return `${Math.floor(attempts)} / ${maxAttempts}`;
+    return `${Math.round(attempts)} / ${maxAttempts}`;
   };
   const getTime = () => {
     return formatTime(timer);
@@ -76,7 +80,7 @@ const App = () => {
 
   useEffect(() => {
     if (cards) {
-      if (attempts === maxAttempts || (cards.every((card) => card.guessed) && timer > 0)) {
+      if (attempts === 0 || (cards.every((card) => card.guessed) && timer > 2)) {
         setGameCompleted(true);
       }
     }
@@ -93,21 +97,25 @@ const App = () => {
   }, [cards, gameCompleted]);
 
   return (
-    <div className="fluid-container mt-2">
-      <Attempts />
-      <div>{completedMsg}</div>
-      <div className="progress mb-4" style={{ height: '20px' }}>
-        <div
-          className="progress-bar"
-          style={{ width: calculateProgress() }}
-          aria-valuenow={matched}
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          Score: {matched}
-          {` / ${maxScore}`}
+    <div className="fluid-container">
+      <div className=" bg-dark pt-3 pb-0 mb-4">
+        <div className=" container row mx-auto">
+          <div className="col-md-2 text-center mb-4">
+            <img src={logo} className="img-fluid logo mt-2" alt="logo" />
+          </div>
+          <div className="col-md-8 px-0">
+            <GameInfo
+              attempts={attempts}
+              maxAttempts={maxAttempts}
+              matched={matched}
+              maxScore={maxScore}
+              calculateProgress={calculateProgress}
+              getTime={getTime}
+            />
+          </div>
         </div>
       </div>
+
       {gameCompleted && (
         <GameCompleted
           gameCompleted={gameCompleted}
@@ -115,6 +123,7 @@ const App = () => {
           getHighScore={getHighScore}
           getAttempts={getAttempts}
           getTime={getTime}
+          completedMsg={completedMsg}
         />
       )}
       <Gameboard
@@ -124,8 +133,6 @@ const App = () => {
         addToAttempts={addToAttempts}
         gameCompleted={gameCompleted}
       />
-      <div>timer: {getTime()}</div>
-      {getAttempts()} Attempts
     </div>
   );
 };

@@ -9,6 +9,7 @@ const INCORRECT_COMBO = new Audio(incorrectSound);
 
 const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameCompleted }) => {
   const [flippedCardTimeout, setFlippedCardTimeout] = useState(false);
+
   const flipCard = (id) => {
     if (!gameCompleted) {
       if (!flippedCardTimeout) {
@@ -27,8 +28,8 @@ const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameComple
         cards.find((card) => card.id === id).id !== flippedCards[0].id
       ) {
         cardsDispatch({ type: 'COMPARE_CARDS' });
-        CORRECT_COMBO.play();
         addToScore();
+        CORRECT_COMBO.play();
       } else {
         setFlippedCardTimeout(true);
         INCORRECT_COMBO.play();
@@ -54,7 +55,7 @@ const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameComple
   };
 
   return (
-    <div className="d-flex flex-wrap mx-auto" style={{ maxWidth: '600px' }}>
+    <div className="d-flex flex-wrap mx-auto justify-content-center" style={{ maxWidth: '600px' }}>
       {cards ? (
         renderCards()
       ) : (
