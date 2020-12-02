@@ -9,9 +9,12 @@ import '../style.css';
 
 import GameInfo from './GameInfo';
 import GameCompleted from './GameCompleted';
-import Collection from './Collection';
 
 import logo from '../SVG/pokemon-logo.svg';
+
+// const initializeCollection = () => {
+//   localStorage.setItem('collection', )
+// }
 
 const App = () => {
   const maxScore = 8;
@@ -175,10 +178,6 @@ const App = () => {
         addToAttempts={addToAttempts}
         gameCompleted={gameCompleted}
       />
-
-      {/* {displayCollection && (
-        <Collection collection={collection} onToggleCollection={onToggleCollection} />
-      )} */}
     </div>
   );
 };

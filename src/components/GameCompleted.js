@@ -57,20 +57,7 @@ const GameCompleted = ({
           </Button>
         </Container>
 
-        <Accordion>
-          <Card bg={'dark'} className="mx-0">
-            <Card.Header>
-              <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                My Collection
-              </Accordion.Toggle>
-            </Card.Header>
-            <Accordion.Collapse eventKey="0">
-              <Card.Body>
-                <Collection collection={collection} onToggleCollection={onToggleCollection} />
-              </Card.Body>
-            </Accordion.Collapse>
-          </Card>
-        </Accordion>
+        <Collection collection={collection} onToggleCollection={onToggleCollection} />
       </div>
     </div>
   );
