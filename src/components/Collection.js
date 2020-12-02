@@ -4,6 +4,10 @@ import { Accordion, Card, Button, Dropdown } from 'react-bootstrap';
 import CollectionItem from './CollectionItem';
 
 const Collection = ({ collection }) => {
+  const [filteredList, setFilteredList] = useState(false);
+
+  const onFilteredListClick = () => {};
+
   const renderCollection = () => {
     return [...collection].map((pokemon, index) => {
       return index === 0 ? null : (
