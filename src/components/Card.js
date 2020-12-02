@@ -18,7 +18,7 @@ const Card = ({ card, flipCard }) => {
         width: '20%',
         height: 'auto',
         minWidth: '30px',
-        transform: `rotateY(${rotate}deg) rotate(360deg)`,
+        transform: `rotateY(${rotate}deg)`,
       }}
       onClick={onCardClick}
     >

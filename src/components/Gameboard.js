@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Card from './Card';
 
 import correctSound from '../sounds/Conversion1.wav';
@@ -7,7 +7,7 @@ import incorrectSound from '../sounds/IMHIT_Damage.wav';
 const CORRECT_COMBO = new Audio(correctSound);
 const INCORRECT_COMBO = new Audio(incorrectSound);
 
-const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameCompleted }) => {
+const Gameboard = ({ addToMatched, cards, addToAttempts, cardsDispatch, gameCompleted }) => {
   const [flippedCardTimeout, setFlippedCardTimeout] = useState(false);
 
   const flipCard = (id) => {
@@ -28,7 +28,7 @@ const Gameboard = ({ addToScore, cards, addToAttempts, cardsDispatch, gameComple
         cards.find((card) => card.id === id).id !== flippedCards[0].id
       ) {
         cardsDispatch({ type: 'COMPARE_CARDS' });
-        addToScore();
+        addToMatched();
         CORRECT_COMBO.play();
       } else {
         setFlippedCardTimeout(true);

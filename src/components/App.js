@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useCallback } from 'react';
 import Gameboard from './Gameboard';
 import { createCards } from '../cards';
 import { cardsReducer } from '../reducers';
@@ -10,8 +10,6 @@ import GameCompleted from './GameCompleted';
 
 import logo from '../SVG/pokemon-logo.svg';
 
-//TODO
-
 const App = () => {
   const [cards, cardsDispatch] = useReducer(cardsReducer, null);
   const [matched, setMatched] = useState(0);
@@ -19,6 +17,8 @@ const App = () => {
   const [timer, setTimer] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [completedMsg, setCompletedMsg] = useState('');
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const maxScore = 8;
   const maxAttempts = 20;
 
@@ -30,11 +30,10 @@ const App = () => {
     });
   };
 
-  const addToScore = () => {
+  const addToMatched = () => {
     setMatched(matched + 1);
   };
   const addToAttempts = () => {
-    console.log(attempts);
     setAttempts(attempts - 0.5);
   };
 
@@ -53,16 +52,29 @@ const App = () => {
     }
   };
 
-  const getHighScore = () => {
-    return Math.round(matched * ((attempts / maxAttempts) * 125));
-  };
+  const getScore = useCallback(() => {
+    return Math.round(matched * Math.floor(attempts / 2) * 125);
+  }, [matched]);
   const getAttempts = () => {
     return `${Math.round(attempts)} / ${maxAttempts}`;
+  };
+  const attemptMultiplier = () => {
+    return `${Math.floor(attempts / 2)}x`;
   };
   const getTime = () => {
     return formatTime(timer);
   };
 
+  useEffect(() => {
+    setScore(getScore());
+  }, [matched, getScore]);
+  useEffect(() => {
+    if (gameCompleted) {
+      if (score > highScore) {
+        setHighScore(score);
+      }
+    }
+  }, [gameCompleted, matched, highScore, score]);
   useEffect(() => {
     requestCards();
   }, []);
@@ -70,7 +82,7 @@ const App = () => {
   useEffect(() => {
     if (!gameCompleted) {
       const interval = setInterval(() => {
-        setTimer(timer + 1);
+        setTimer((timer) => timer + 1);
       }, 1000);
       return () => {
         clearInterval(interval);
@@ -120,15 +132,19 @@ const App = () => {
         <GameCompleted
           gameCompleted={gameCompleted}
           onNewGame={onNewGame}
-          getHighScore={getHighScore}
+          getScore={getScore}
+          highScore={highScore}
           getAttempts={getAttempts}
           getTime={getTime}
           completedMsg={completedMsg}
+          attempts={attempts}
+          maxAttempts={maxAttempts}
+          attemptMultiplier={attemptMultiplier}
         />
       )}
       <Gameboard
         cardsDispatch={cardsDispatch}
-        addToScore={addToScore}
+        addToMatched={addToMatched}
         cards={cards}
         addToAttempts={addToAttempts}
         gameCompleted={gameCompleted}

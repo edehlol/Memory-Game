@@ -2,15 +2,15 @@ import React from 'react';
 import pokeball from '../SVG/pokemon-logo.png';
 
 const Attempts = ({ attempts, maxAttempts }) => {
-  const getOpacity = (counter) => {
-    if (attempts <= counter - 1 && attempts > counter - 2) {
-      return '50%';
-    } else if (attempts <= counter - 2) {
-      return '0%';
-    }
-  };
   const renderAttempts = () => {
     let renderedAttempts = [];
+    const getOpacity = (counter) => {
+      if (attempts <= counter - 1 && attempts > counter - 2) {
+        return '50%';
+      } else if (attempts <= counter - 2) {
+        return '0%';
+      }
+    };
 
     for (let i = 1; i < maxAttempts + 1; i++) {
       if (i % 2 === 0) {
