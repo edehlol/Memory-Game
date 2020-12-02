@@ -2,10 +2,10 @@ import React from 'react';
 
 import Attempts from './Attempts';
 
-const GameInfo = ({ attempts, maxAttempts, matched, maxScore, calculateProgress, getTime }) => {
+const GameInfo = ({ attempts, maxAttempts, matched, calculateProgress, getTime }) => {
   return (
     <div className="container" style={{ maxWidth: '535px' }}>
-      <small className="text-muted">Completed</small>
+      <small className="text-muted">Completed {matched}/8</small>
       <div className="progress" style={{ height: '32px' }}>
         <div
           className="progress-bar"

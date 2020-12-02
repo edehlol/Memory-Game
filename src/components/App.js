@@ -4,14 +4,21 @@ import { createCards } from '../cards';
 import { cardsReducer } from '../reducers';
 import { formatTime } from '../helpers';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../style.css';
+
 import GameInfo from './GameInfo';
 import GameCompleted from './GameCompleted';
+import Collection from './Collection';
 
 import logo from '../SVG/pokemon-logo.svg';
 
 const App = () => {
+  const maxScore = 8;
+  const maxAttempts = 20;
+
   const [cards, cardsDispatch] = useReducer(cardsReducer, null);
+  const [collection, setCollection] = useState(Array(156));
   const [matched, setMatched] = useState(0);
   const [attempts, setAttempts] = useState(20);
   const [timer, setTimer] = useState(0);
@@ -19,8 +26,7 @@ const App = () => {
   const [completedMsg, setCompletedMsg] = useState('');
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
-  const maxScore = 8;
-  const maxAttempts = 20;
+  const [displayCollection, setDisplayCollection] = useState(false);
 
   const requestCards = async () => {
     const cards = await createCards();
@@ -35,6 +41,19 @@ const App = () => {
   };
   const addToAttempts = () => {
     setAttempts(attempts - 0.5);
+  };
+  const addToCollection = () => {
+    const flippedCards = cards.filter((card) => card.guessed);
+    console.log(flippedCards);
+    flippedCards.forEach((card) => {
+      if (collection[card.pokemonId] === undefined) {
+        collection[card.pokemonId] = card;
+        setCollection(collection);
+      }
+    });
+  };
+  const attemptMultiplier = () => {
+    return `${Math.floor(attempts / 2)}x`;
   };
 
   const calculateProgress = () => {
@@ -51,16 +70,17 @@ const App = () => {
       setAttempts(maxAttempts);
     }
   };
+  const onToggleCollection = () => {
+    setDisplayCollection(!displayCollection);
+  };
 
   const getScore = useCallback(() => {
     return Math.round(matched * Math.floor(attempts / 2) * 125);
-  }, [matched]);
+  }, [matched, attempts]);
   const getAttempts = () => {
     return `${Math.round(attempts)} / ${maxAttempts}`;
   };
-  const attemptMultiplier = () => {
-    return `${Math.floor(attempts / 2)}x`;
-  };
+
   const getTime = () => {
     return formatTime(timer);
   };
@@ -78,7 +98,11 @@ const App = () => {
   useEffect(() => {
     requestCards();
   }, []);
-
+  useEffect(() => {
+    if (gameCompleted) {
+      addToCollection();
+    }
+  });
   useEffect(() => {
     if (!gameCompleted) {
       const interval = setInterval(() => {
@@ -92,11 +116,11 @@ const App = () => {
 
   useEffect(() => {
     if (cards) {
-      if (attempts === 0 || (cards.every((card) => card.guessed) && timer > 2)) {
+      if (attempts === 0 || (cards.every((card) => card.guessed) && matched > 0)) {
         setGameCompleted(true);
       }
     }
-  }, [timer, cards, attempts, gameCompleted]);
+  }, [timer, cards, attempts, matched]);
 
   useEffect(() => {
     if (gameCompleted) {
@@ -112,8 +136,8 @@ const App = () => {
     <div className="fluid-container">
       <div className=" bg-dark pt-3 pb-0 mb-4">
         <div className=" container row mx-auto">
-          <div className="col-md-2 text-center mb-4">
-            <img src={logo} className="img-fluid logo mt-2" alt="logo" />
+          <div className="col-md-2 text-center my-auto">
+            <img src={logo} className="img-fluid logo mb-4" alt="logo" />
           </div>
           <div className="col-md-8 px-0">
             <GameInfo
@@ -140,6 +164,8 @@ const App = () => {
           attempts={attempts}
           maxAttempts={maxAttempts}
           attemptMultiplier={attemptMultiplier}
+          onToggleCollection={onToggleCollection}
+          collection={collection}
         />
       )}
       <Gameboard
@@ -149,6 +175,10 @@ const App = () => {
         addToAttempts={addToAttempts}
         gameCompleted={gameCompleted}
       />
+
+      {/* {displayCollection && (
+        <Collection collection={collection} onToggleCollection={onToggleCollection} />
+      )} */}
     </div>
   );
 };
