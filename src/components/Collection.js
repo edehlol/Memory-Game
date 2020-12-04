@@ -9,6 +9,7 @@ const Collection = ({ collection }) => {
   const onFilteredListClick = () => {};
 
   const renderCollection = () => {
+    console.log(collection.filter((item) => item !== null));
     return [...collection].map((pokemon, index) => {
       return index === 0 ? null : (
         <React.Fragment key={index}>

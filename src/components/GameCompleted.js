@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Accordion, Card, Container } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 
 import pokeball from '../SVG/pokemon-logo.png';
 

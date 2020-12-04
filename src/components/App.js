@@ -12,16 +12,26 @@ import GameCompleted from './GameCompleted';
 
 import logo from '../SVG/pokemon-logo.svg';
 
-// const initializeCollection = () => {
-//   localStorage.setItem('collection', )
-// }
+const useLocalStorage = (key, defaultValue) => {
+  const stored = localStorage.getItem(key);
+  const initial = stored ? JSON.parse(stored) : defaultValue;
+  const [value, setValue] = useState(initial);
+
+  useEffect(() => {
+    console.log(value);
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue];
+};
 
 const App = () => {
   const maxScore = 8;
   const maxAttempts = 20;
 
   const [cards, cardsDispatch] = useReducer(cardsReducer, null);
-  const [collection, setCollection] = useState(Array(156));
+  const [collection, setCollection] = useLocalStorage('collection', Array(156));
+
   const [matched, setMatched] = useState(0);
   const [attempts, setAttempts] = useState(20);
   const [timer, setTimer] = useState(0);
@@ -45,16 +55,7 @@ const App = () => {
   const addToAttempts = () => {
     setAttempts(attempts - 0.5);
   };
-  const addToCollection = () => {
-    const flippedCards = cards.filter((card) => card.guessed);
-    console.log(flippedCards);
-    flippedCards.forEach((card) => {
-      if (collection[card.pokemonId] === undefined) {
-        collection[card.pokemonId] = card;
-        setCollection(collection);
-      }
-    });
-  };
+
   const attemptMultiplier = () => {
     return `${Math.floor(attempts / 2)}x`;
   };
@@ -101,11 +102,24 @@ const App = () => {
   useEffect(() => {
     requestCards();
   }, []);
+
   useEffect(() => {
+    const addToCollection = () => {
+      const flippedCards = cards.filter((card) => card.guessed);
+      const newCollection = [...collection];
+
+      flippedCards.forEach((card) => {
+        if (newCollection[card.pokemonId] === null) {
+          newCollection[card.pokemonId] = card;
+        }
+      });
+      setCollection(newCollection);
+    };
     if (gameCompleted) {
       addToCollection();
     }
-  });
+  }, [gameCompleted]);
+
   useEffect(() => {
     if (!gameCompleted) {
       const interval = setInterval(() => {

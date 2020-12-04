@@ -13,7 +13,7 @@ export const createCards = async () => {
   let pokemons = [];
   let cards = [];
   let idList = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 1; i++) {
     let randomId = Math.round(Math.random() * 151);
     while (idList.includes(randomId) || randomId === 0) {
       randomId = Math.round(Math.random() * 151);

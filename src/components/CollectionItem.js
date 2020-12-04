@@ -4,7 +4,7 @@ import pokeball from '../SVG/pokemon-logo.png';
 
 const CollectionItem = ({ index, pokemon }) => {
   const renderItem = () => {
-    const isUnlocked = typeof pokemon !== 'undefined';
+    const isUnlocked = pokemon !== null && typeof pokemon !== 'undefined';
     return (
       <Card className="m-2" style={{ width: '20%', height: '180px' }}>
         <Card.Img variant="top" src={isUnlocked ? pokemon.img : pokeball} />
