@@ -3,6 +3,7 @@ import Gameboard from './Gameboard';
 import { createCards } from '../cards';
 import { cardsReducer } from '../reducers';
 import { formatTime } from '../helpers';
+import { useCollection } from '../hooks';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../style.css';
@@ -12,34 +13,22 @@ import GameCompleted from './GameCompleted';
 
 import logo from '../SVG/pokemon-logo.svg';
 
-const useLocalStorage = (key, defaultValue) => {
-  const stored = localStorage.getItem(key);
-  const initial = stored ? JSON.parse(stored) : defaultValue;
-  const [value, setValue] = useState(initial);
-
-  useEffect(() => {
-    console.log(value);
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue];
-};
-
 const App = () => {
   const maxScore = 8;
   const maxAttempts = 20;
 
   const [cards, cardsDispatch] = useReducer(cardsReducer, null);
-  const [collection, setCollection] = useLocalStorage('collection', Array(156));
+  const [collection, setCollection] = useCollection('collection', Array(156));
 
   const [matched, setMatched] = useState(0);
-  const [attempts, setAttempts] = useState(20);
+  const [attempts, setAttempts] = useState(maxAttempts);
   const [timer, setTimer] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [completedMsg, setCompletedMsg] = useState('');
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [displayCollection, setDisplayCollection] = useState(false);
+  const [newCollection, setNewCollection] = useState([]);
 
   const requestCards = async () => {
     const cards = await createCards();
@@ -72,6 +61,7 @@ const App = () => {
       setTimer(0);
       setCompletedMsg('');
       setAttempts(maxAttempts);
+      setNewCollection([]);
     }
   };
   const onToggleCollection = () => {
@@ -106,18 +96,20 @@ const App = () => {
   useEffect(() => {
     const addToCollection = () => {
       const flippedCards = cards.filter((card) => card.guessed);
-      const newCollection = [...collection];
+      const updatedCollection = [...collection];
 
       flippedCards.forEach((card) => {
-        if (newCollection[card.pokemonId] === null) {
-          newCollection[card.pokemonId] = card;
+        if (updatedCollection[card.pokemonId] === null) {
+          setNewCollection((newCollection) => [...newCollection, card]);
+          updatedCollection[card.pokemonId] = card;
         }
       });
-      setCollection(newCollection);
+      setCollection(updatedCollection);
     };
     if (gameCompleted) {
       addToCollection();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameCompleted]);
 
   useEffect(() => {
@@ -183,6 +175,7 @@ const App = () => {
           attemptMultiplier={attemptMultiplier}
           onToggleCollection={onToggleCollection}
           collection={collection}
+          newCollection={newCollection}
         />
       )}
       <Gameboard
