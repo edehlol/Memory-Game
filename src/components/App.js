@@ -45,14 +45,6 @@ const App = () => {
     setAttempts(attempts - 0.5);
   };
 
-  const attemptMultiplier = () => {
-    return `${Math.floor(attempts / 2)}x`;
-  };
-
-  const calculateProgress = () => {
-    return `${(matched / maxScore) * 100}%`;
-  };
-
   const onNewGame = () => {
     if (gameCompleted) {
       setGameCompleted(false);
@@ -71,6 +63,7 @@ const App = () => {
   const getScore = useCallback(() => {
     return Math.round(matched * Math.floor(attempts / 2) * 125);
   }, [matched, attempts]);
+
   const getAttempts = () => {
     return `${Math.round(attempts)} / ${maxAttempts}`;
   };
@@ -99,7 +92,10 @@ const App = () => {
       const updatedCollection = [...collection];
 
       flippedCards.forEach((card) => {
-        if (updatedCollection[card.pokemonId] === null) {
+        if (
+          updatedCollection[card.pokemonId] === null ||
+          typeof updatedCollection[card.pokemonId] === 'undefined'
+        ) {
           setNewCollection((newCollection) => [...newCollection, card]);
           updatedCollection[card.pokemonId] = card;
         }
@@ -154,7 +150,6 @@ const App = () => {
               maxAttempts={maxAttempts}
               matched={matched}
               maxScore={maxScore}
-              calculateProgress={calculateProgress}
               getTime={getTime}
             />
           </div>
@@ -172,7 +167,6 @@ const App = () => {
           completedMsg={completedMsg}
           attempts={attempts}
           maxAttempts={maxAttempts}
-          attemptMultiplier={attemptMultiplier}
           onToggleCollection={onToggleCollection}
           collection={collection}
           newCollection={newCollection}

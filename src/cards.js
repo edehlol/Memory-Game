@@ -13,14 +13,13 @@ export const createCards = async () => {
   let pokemons = [];
   let cards = [];
   let idList = [];
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 8; i++) {
     let randomId = Math.round(Math.random() * 151);
     while (idList.includes(randomId) || randomId === 0) {
       randomId = Math.round(Math.random() * 151);
     }
     idList.push(randomId);
     const response = await fetchPokemon(idList[idList.length - 1]);
-    console.log(response);
     pokemons.push(response);
   }
   pokemons.forEach((pokemon) => {

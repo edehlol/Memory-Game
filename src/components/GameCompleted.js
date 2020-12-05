@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Alert } from 'react-bootstrap';
+import { Button, Container, Alert, Badge } from 'react-bootstrap';
+import { attemptMultiplier } from '../helpers';
 
 import pokeball from '../SVG/pokemon-logo.png';
-import exclamation from '../SVG/exclamation-circle.svg';
 
 import Collection from './Collection';
 
@@ -11,12 +11,12 @@ const GameCompleted = ({
   onNewGame,
   getScore,
   getTime,
-  attemptMultiplier,
   highScore,
   completedMsg,
   onToggleCollection,
   collection,
   newCollection,
+  attempts,
 }) => {
   const [visibility, setVisibility] = useState('hidden');
 
@@ -40,44 +40,52 @@ const GameCompleted = ({
   }, [gameCompleted]);
 
   return (
-    <div
-      className="completed-container text-center bg-dark text-white d-flex justify-content-center align-items-start"
-      style={{ visibility: visibility }}
-    >
-      <Alert className="fixed-top" variant={completedMsg === 'You Won!' ? 'success' : 'danger'}>
+    <div>
+      <Alert
+        className="fixed-top mb-4"
+        variant={completedMsg === 'You Won!' ? 'success' : 'danger'}
+        style={{ visibility: visibility }}
+      >
         {completedMsg}
       </Alert>
-      <div>
-        <Container className=" my-4 mx-auto">
-          <p className="mb-0">score:</p>
-          <h1 className="display-1">{getScore()}</h1>
-          <div className="d-flex direction-row justify-content-center ">
-            <div className="">
-              <p>
-                Multiplier: {attemptMultiplier()}{' '}
-                <img className="img-fluid attempt-ball text-left" src={pokeball} alt="pokeball" />
-              </p>
-              <p className="text-left">highscore: {highScore}</p>
-              <div className="border rounded px-1 mx-auto" style={{ width: '4em' }}>
-                {getTime()}
+      <div
+        className="completed-container text-center bg-dark text-white d-flex justify-content-center align-items-start pt-5"
+        style={{ visibility: visibility }}
+      >
+        <div>
+          <Container className=" my-4 mx-auto">
+            <small className="text-muted mb-0 mt-5">score</small>
+            <h1 className="display-1">{getScore()}</h1>
+            <div className="d-flex direction-row justify-content-center ">
+              <div className="">
+                <small className="text-muted mb-0">multiplier</small>
+                <p className="">
+                  {attemptMultiplier(attempts)}{' '}
+                  <img className="img-fluid attempt-ball" src={pokeball} alt="pokeball" />
+                </p>
+                <small className="text-muted mb-0">highscore</small>
+                <p className="">{highScore}</p>
+                <small className="text-muted mb-0">timer</small>
+                <div className="border rounded px-1 mx-auto" style={{ width: '4em' }}>
+                  {getTime()}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="my-4">
-            {newCollection.length > 0 && (
-              <p className="mb-0 d-flex align-items-center justify-content-center">
-                <img src={exclamation} alt="exclamation" className="mr-1" />
-                <span>New</span>
-              </p>
-            )}
-            {renderNewCollection()}
-          </div>
-          <Button variant="primary" sticky="top" className="mt-4" onClick={onNewGame}>
-            Play Again
-          </Button>
-        </Container>
+            <div className="my-4">
+              {newCollection.length > 0 && (
+                <div>
+                  <Badge variant="success">New</Badge>
+                </div>
+              )}
+              {renderNewCollection()}
+            </div>
+            <Button variant="primary" sticky="top" className="mt-4" onClick={onNewGame}>
+              Play Again
+            </Button>
+          </Container>
 
-        <Collection collection={collection} onToggleCollection={onToggleCollection} />
+          <Collection collection={collection} onToggleCollection={onToggleCollection} />
+        </div>
       </div>
     </div>
   );

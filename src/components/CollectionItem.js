@@ -10,7 +10,7 @@ const CollectionItem = ({ index, pokemon }) => {
         className="m-2 shadow"
         bg={'dark'}
         text={'white'}
-        style={{ width: '30%', height: '280px' }}
+        style={{ width: '12em', height: '280px', minWidth: '12em' }}
       >
         <Card.Img className="p-4" variant="top" src={isUnlocked ? pokemon.img : pokeball} />
         <Card.Body className="pt-0 ">

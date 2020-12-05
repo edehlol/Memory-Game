@@ -6,7 +6,6 @@ export const useCollection = (key, defaultValue) => {
   const [value, setValue] = React.useState(initial);
 
   React.useEffect(() => {
-    console.log(value);
     localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
 

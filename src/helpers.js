@@ -11,3 +11,11 @@ export const formatTime = (timer) => {
   }
   return `${minutes}:${seconds}`;
 };
+
+export const calculateProgress = (matched, maxScore) => {
+  return `${(matched / maxScore) * 100}%`;
+};
+
+export const attemptMultiplier = (attempts) => {
+  return `${Math.floor(attempts / 2)}x`;
+};

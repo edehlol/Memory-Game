@@ -20,7 +20,7 @@ const Attempts = ({ attempts, maxAttempts }) => {
               className="img-fluid attempt-ball"
               src={pokeball}
               alt="pokeball"
-              style={{ opacity: getOpacity(i) }}
+              style={{ opacity: getOpacity(i), width: '20px', height: '20px' }}
             />
           </div>
         );
